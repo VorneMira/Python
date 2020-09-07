@@ -43,7 +43,6 @@ def kontrolli(Hyvikset, tapahtuma, Pahikset):
             
 
         
-
         for vihollinen in Pahikset:
             if   (Hyvikset[0][1] <= Pahikset[0][1] +50 and Hyvikset[0][1] >= Pahikset[0][1] -50) and (Hyvikset[0][2] <= Pahikset[0][2]+50 and Hyvikset[0][2] >= Pahikset[0][2]-50):
                 theEnd()
@@ -117,13 +116,13 @@ def kontrolli(Hyvikset, tapahtuma, Pahikset):
                 Alas = False
         
         if Oikealle and paahahmo[1] < 540:
-            paahahmo[1] += 10
+            paahahmo[1] += 15
         if Vasemmalle and paahahmo[1] > 0:
-            paahahmo[1] -= 10
+            paahahmo[1] -= 15
         if Ylös and  paahahmo[2] > 0:
-            paahahmo[2] -= 10
+            paahahmo[2] -= 15
         if Alas and  paahahmo[2] < 300:
-            paahahmo[2] += 10
+            paahahmo[2] += 15
            
        
             

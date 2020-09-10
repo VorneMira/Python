@@ -1,13 +1,24 @@
 from tkinter import *
 import sqlite3
+import os
 
 
-#Variable that opens accounts database
+#Variable that opens "Accounts" database
 conn = sqlite3.connect("Accounts.db")
     
-#Variable that opens accounts database
+#Variable that opens "Accounts" database
 
 c = conn.cursor()
+
+if os.path.exists("Accounts.db"):
+    print("On jo olemassa")
+else:
+    accTable = '''CREATE TABLE Accounts (
+        name varchar(20)
+        password varchar(100)
+    )'''
+    
+
 
 def Register():
     screen1 = Toplevel(screen)
@@ -25,11 +36,13 @@ def Register():
     Label(screen1, text = "Password").pack()
     Entry(screen1, textvariable = password).pack()
     Label(screen1, text = "").pack()
-    Button(screen1, text = "Register", width = 10, height = 1).pack()
+    Button(screen1, text = "Register", width = 10, height = 1, command = createAcc).pack()
     
     from login import Login, Register
 
+def createAcc():
 
+    '''INSERT INTO Accounts (name,password) VALUES (username,password)'''
 
 def Login():
     print("swag")

@@ -4,20 +4,25 @@ import os
 
 
 #Variable that opens "Accounts" database
-conn = sqlite3.connect("Accounts.db")
+
     
 #Variable that opens "Accounts" database
 
-c = conn.cursor()
+
 
 if os.path.exists("Accounts.db"):
     print("On jo olemassa")
 else:
-    accTable = '''CREATE TABLE Accounts (
-        name varchar(20)
+    conn = sqlite3.connect("Accounts.db")
+    c = conn.cursor()
+    accTable = '''CREATE TABLE Users (
+
+        name varchar(20),
         password varchar(100)
     )'''
-    
+    c.execute(accTable)
+    conn.commit()
+    conn.close()
 
 
 def Register():
@@ -25,29 +30,93 @@ def Register():
     screen1.title("Register")
     screen1.geometry("300x250")
     
-
-    username = StringVar()
-    password = StringVar()
+  
 
     Label(screen1, text = "Create account").pack()
+
     Label(screen1, text = "").pack()
+
     Label(screen1, text = "Username").pack()
-    Entry(screen1, textvariable = username).pack()
+
+    global Username
+    Username = Entry(screen1, width = 30)
+    Username.pack()
+    
+
     Label(screen1, text = "Password").pack()
-    Entry(screen1, textvariable = password).pack()
-    Label(screen1, text = "").pack()
+
+    global Password 
+    Password = Entry(screen1, width = 30)
+    Password.pack()
+   
+
+
+
     Button(screen1, text = "Register", width = 10, height = 1, command = createAcc).pack()
     
-    from login import Login, Register
-
 def createAcc():
 
-    '''INSERT INTO Accounts (name,password) VALUES (username,password)'''
+    conn = sqlite3.connect("Accounts.db")
+    c = conn.cursor()
+
+   
+
+    c.execute("INSERT INTO Users (name,password) VALUES (:name, :password)",
+      {
+          'name' : Username.get(),
+          'password' : Password.get()
+    })
+
+
+
+    conn.commit()
+    conn.close
+
 
 def Login():
-    print("swag")
+    screen2 = Toplevel(screen)
+    screen2.title("Log in")
+    screen2.geometry("300x250")
+    
 
-0
+    Label(screen2, text = "Username").pack()
+
+    global inputUsername
+    inputUsername = Entry(screen2, width = 30)
+    inputUsername.pack()
+    
+
+    Label(screen2, text = "Password").pack()
+
+    global inputPassword 
+    inputPassword = Entry(screen2, width = 30)
+    inputPassword.pack()
+    Button(screen2, text = "Log in", width = 10, height = 1, command = allAccounts).pack()
+
+def logginIn():
+
+    conn = sqlite3.connect("Accounts.db")
+    c = conn.cursor()
+
+   
+    
+
+
+
+def allAccounts():
+
+
+    conn = sqlite3.connect("Accounts.db")
+
+    c = conn.cursor()
+    c.execute("SELECT name FROM Users")
+    Accounts = c.fetchall()
+
+    for account in Accounts:
+        print(account[0], account[1])
+       
+
+
 def main_screen():
     global screen
     screen = Tk()
@@ -66,16 +135,4 @@ def main_screen():
 
 main_screen()
 
-#root = Tk()
-
-#def myClick():
-    #napClik=Label(root, text="painettu", padx=30, pady=40, fg="green", bg="#CA934D")
-    #napClik.pack()
-
-#myButton = Button(root, text="Paina nappulaa")
-#myButton.pack()
-
-#myButton = Button(root, text="Paina nappulaa", padx=100, pady=50,command=myClick, fg="red", bg="#CA934D")
-#myButton.pack()
-#root.mainloop()
 

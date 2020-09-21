@@ -10,9 +10,8 @@ import os
 
 
 
-if os.path.exists("Accounts.db"):
-    print("On jo olemassa")
-else:
+if os.path.exists("Accounts.db") == False:
+    
     conn = sqlite3.connect("Accounts.db")
     c = conn.cursor()
     accTable = '''CREATE TABLE Users (
@@ -26,6 +25,8 @@ else:
 
 
 def Register():
+    global screen1
+    
     screen1 = Toplevel(screen)
     screen1.title("Register")
     screen1.geometry("300x250")
@@ -50,23 +51,34 @@ def Register():
     Password.pack()
    
 
-
-
     Button(screen1, text = "Register", width = 10, height = 1, command = createAcc).pack()
-    
-def createAcc():
 
+def createAcc():
+    existsLabel = Label(screen1, fg="red", text = "")
+    
     conn = sqlite3.connect("Accounts.db")
     c = conn.cursor()
 
-   
+    findUser = ("SELECT * FROM Users WHERE name = ? AND password = ?")
+    c.execute(findUser,[(Username.get()),(Password.get())])
+    isUserTaken = c.fetchall()
 
-    c.execute("INSERT INTO Users (name,password) VALUES (:name, :password)",
-      {
+    if isUserTaken:
+        existsLabel = Label(screen1, fg="red", text = "User already exists")
+        existsLabel.pack()
+
+    else:
+
+        c.execute("INSERT INTO Users (name,password) VALUES (:name, :password)",
+        {
           'name' : Username.get(),
           'password' : Password.get()
-    })
+        })
 
+        Label(screen1, fg="green", text = "User created").pack()
+
+        
+   
 
 
     conn.commit()
@@ -91,6 +103,7 @@ def Login():
     global inputPassword 
     inputPassword = Entry(screen2, width = 30)
     inputPassword.pack()
+
     Button(screen2, text = "Log in", width = 10, height = 1, command = allAccounts).pack()
 
 def logginIn():
@@ -109,12 +122,15 @@ def allAccounts():
     conn = sqlite3.connect("Accounts.db")
 
     c = conn.cursor()
-    c.execute("SELECT name FROM Users")
+    c.execute("SELECT * FROM Users")
     Accounts = c.fetchall()
 
     for account in Accounts:
         print(account[0], account[1])
-       
+    if inputUsername == c.execute("SELECT name FROM Users") and inputPassword == c.execute("SELECT password FROM Users"):
+        print("nais")
+    
+    
 
 
 def main_screen():

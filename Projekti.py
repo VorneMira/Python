@@ -3,13 +3,7 @@ import sqlite3
 import os
 
 
-#Variable that opens "Accounts" database
-
-    
-#Variable that opens "Accounts" database
-
-
-
+#Creates Accounts database if one does not exist yet
 if os.path.exists("Accounts.db") == False:
     
     conn = sqlite3.connect("Accounts.db")
@@ -23,7 +17,7 @@ if os.path.exists("Accounts.db") == False:
     conn.commit()
     conn.close()
 
-
+#Function that creates window where you can make an account
 def Register():
     global screen1
     
@@ -46,37 +40,56 @@ def Register():
 
     Label(screen1, text = "Password").pack()
 
+
     global Password 
-    Password = Entry(screen1, width = 30)
+    Password = Entry(screen1, width = 30, show='*')
     Password.pack()
    
+    global existsLabel
+    existsLabel = Label(screen1, fg='red', text="")
+
+    global tooSmall
+    tooSmall = Label(screen1, fg="red", text="")
 
     Button(screen1, text = "Register", width = 10, height = 1, command = createAcc).pack()
 
+    existsLabel.pack()
+
+    
+# Function checks if your account can be registered, it makes sure you dont make an 
+# Account that has a password with less than 1 character or a name with less than tree characters
+# It also doesent let you create an account if an account with the same name and password already exists
 def createAcc():
-    existsLabel = Label(screen1, fg="red", text = "")
+    global existsLabel
+    global tooSmall
     
     conn = sqlite3.connect("Accounts.db")
     c = conn.cursor()
-
     findUser = ("SELECT * FROM Users WHERE name = ? AND password = ?")
     c.execute(findUser,[(Username.get()),(Password.get())])
     isUserTaken = c.fetchall()
 
     if isUserTaken:
-        existsLabel = Label(screen1, fg="red", text = "User already exists")
-        existsLabel.pack()
+        existsLabel['text'] = "User already exists"
 
     else:
+        if len(Username.get()) > 3 and len(Password.get()) >= 1:
+            c.execute("INSERT INTO Users (name,password) VALUES (:name, :password)",
+            {
+            'name' : Username.get(),
+            'password' : Password.get()
+            })
+            existsLabel['text'] = ""
+            screen1.destroy()
+           
+        elif len(Password.get()) < 1:
+            existsLabel['text'] = "Password must be atleast 1 character long"
+        elif len(Username.get()) < 3:
+            existsLabel['text'] = "Username must be atleast 3 characters long"
 
-        c.execute("INSERT INTO Users (name,password) VALUES (:name, :password)",
-        {
-          'name' : Username.get(),
-          'password' : Password.get()
-        })
+           
 
-        Label(screen1, fg="green", text = "User created").pack()
-
+       
         
    
 
@@ -84,7 +97,7 @@ def createAcc():
     conn.commit()
     conn.close
 
-
+#This function creates a window where you can log in with you account
 def Login():
     screen2 = Toplevel(screen)
     screen2.title("Log in")
@@ -101,15 +114,29 @@ def Login():
     Label(screen2, text = "Password").pack()
 
     global inputPassword 
-    inputPassword = Entry(screen2, width = 30)
+    inputPassword = Entry(screen2, width = 30, show='*')
     inputPassword.pack()
 
-    Button(screen2, text = "Log in", width = 10, height = 1, command = allAccounts).pack()
+    Button(screen2, text = "Log in", width = 10, height = 1, command = logginIn).pack()
+    Button(screen2, text = "Accounts", width = 10, height = 1, command = allAccounts).pack()
 
+#This function checks what account you logged in with
 def logginIn():
 
     conn = sqlite3.connect("Accounts.db")
     c = conn.cursor()
+
+    findUser = ("SELECT * FROM Users WHERE name = ? AND password = ?")
+    c.execute(findUser,[(inputUsername.get()),(inputPassword.get())])
+    accountInput= c.fetchall()
+
+
+    if accountInput:
+        print("Logged in")
+
+
+
+
 
    
     

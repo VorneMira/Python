@@ -3,17 +3,28 @@ import sqlite3
 import os
 
 
+
 #Creates Accounts database if one does not exist yet
 if os.path.exists("Accounts.db") == False:
     
     conn = sqlite3.connect("Accounts.db")
     c = conn.cursor()
-    accTable = '''CREATE TABLE Users (
 
+    accTable = '''CREATE TABLE Users (
+        ID integer PRIMARY KEY,
         name varchar(20),
         password varchar(100)
     )'''
+
+    TaskTable= '''CREATE TABLE userTasks (
+        userOfTasks integer NOT NULL,
+        taskName varchar(20),
+        task varchar(1000),
+        FOREIGN KEY(userOfTasks) REFERENCES Users(ID)
+    )'''
+
     c.execute(accTable)
+    c.execute(TaskTable)
     conn.commit()
     conn.close()
 
@@ -82,9 +93,9 @@ def createAcc():
             existsLabel['text'] = ""
             screen1.destroy()
            
-        elif len(Password.get()) < 1:
+        elif len(Password.get()) <1:
             existsLabel['text'] = "Password must be atleast 1 character long"
-        elif len(Username.get()) < 3:
+        elif len(Username.get()) <= 2:
             existsLabel['text'] = "Username must be atleast 3 characters long"
 
            
@@ -133,8 +144,26 @@ def logginIn():
 
     if accountInput:
         print("Logged in")
+        openTaskList()
 
 
+def openTaskList():
+    global taskscreen
+    taskscreen = Tk()
+    taskscreen.geometry("500x500")
+    taskscreen.title("TaskList")
+
+    Button(taskscreen, text="Create new task", bg="lightGray", fg="green",command= createTask).grid(row=0, column=0, columnspan=1)
+
+   
+
+
+
+def createTask():
+    Label(taskscreen, text="Task name").grid(row=1,column=2,columnspan=1)
+    Entry(taskscreen).grid(row=1, column=3, columnspan=3)
+    Label(taskscreen, text="Task info").grid(row=2,column=2,columnspan=1)
+    Text(taskscreen, height=20, width=40).grid(row=2, column=3, columnspan=3)
 
 
 
@@ -153,7 +182,8 @@ def allAccounts():
     Accounts = c.fetchall()
 
     for account in Accounts:
-        print(account[0], account[1])
+        print(account[0], account[1], account[2])
+        print("----------------------------")
     if inputUsername == c.execute("SELECT name FROM Users") and inputPassword == c.execute("SELECT password FROM Users"):
         print("nais")
     
@@ -174,8 +204,9 @@ def main_screen():
     screen.mainloop()
 
 
-
-
 main_screen()
+
+
+
 
 

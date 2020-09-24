@@ -14,13 +14,13 @@ if os.path.exists("Accounts.db") == False:
     #this table holds all the users names and the their passwords
     accTable = '''CREATE TABLE Users (
         ID integer PRIMARY KEY,
-        name varchar(20),
+        name varchar(100),
         password varchar(100)
     )'''
 
     #this table holds all the users tasks
     TaskTable= '''CREATE TABLE userTasks (
-        userOfTasks integer NOT NULL,
+        userOfTasks integer FOREIGN KEY,
         taskName varchar(20),
         task varchar(1000),
         FOREIGN KEY(userOfTasks) REFERENCES Users(ID)
@@ -64,7 +64,7 @@ def Register():
     existsLabel.pack()
 
     
-# Function checks if your account can be registered, it makes sure you dont make an account that has a password with less than 1 character or a name with less than tree characters
+# Function checks if your account can be registered, it makes sure you dont make an account that has a password with less than 1 character or a name with less than 4 characters
 # It also doesent let you create an account if an account with the same name and password already exists
 def createAcc():
     global existsLabel
@@ -81,7 +81,7 @@ def createAcc():
     if isUserTaken:
         existsLabel['text'] = "User already exists"
     
-    #if the the inputted is atleast 3 characters long and password atleast 1 character long it registers the account to the Users table
+    #if the the inputted is atleast 4 characters long and password atleast 1 character long it registers the account to the Users table
     else:
         if len(Username.get()) > 3 and len(Password.get()) >= 1:
             c.execute("INSERT INTO Users (name,password) VALUES (:name, :password)",
@@ -144,7 +144,23 @@ def logginIn():
 
     #opens taskList if you logged in with an registered account
     if accountInput:
-        
+        global findID
+        findID = ("SELECT ID FROM Users WHERE name = ? AND password = ?")
+        c.execute(findID,[inputUsername.get(),inputPassword.get()])
+
+        global user_ID
+        user_ID = c.fetchone()
+        user_ID = int(user_ID[0])
+
+
+        #user_ID = user_ID.replace("[","")
+        #user_ID = user_ID.replace("(","")
+        #user_ID = user_ID.replace(",","")
+        #user_ID = user_ID.replace(")","")
+        #user_ID = user_ID.replace("]","")
+
+        print(user_ID)
+
         openTaskList()
         screen.destroy()
     
@@ -175,19 +191,59 @@ def logginIn():
 def openTaskList():
     global taskscreen
     taskscreen = Tk()
-    taskscreen.geometry("500x500")
+    taskscreen.geometry("777x800")
     taskscreen.title("TaskList")
 
     
-    Button(taskscreen, text="Log out", bg="lightGray", fg="blue",command= logOut).grid(row=0 ,column=0)
+    Button(taskscreen, text="Log out", bg="lightGray", fg="blue",command= logOut, width=23).grid(row=0 ,column=0, columnspan=2)
     
-    Button(taskscreen, text="Create new task", bg="lightGray", fg="green", width=31).grid(row=0 ,column=1)
+    Button(taskscreen, text="Create new task", bg="lightGray", fg="green", width=31, command= createTask).grid(row=0 ,column=2, columnspan=2)
 
-    Button(taskscreen, text="My tasks", bg="lightGrey", fg="green", width=31).grid(row=0, column=6)
+    Button(taskscreen, text="My tasks", bg="lightGrey", fg="green", width=31).grid(row=0, column=4, columnspan=2)
 
     
+def createTask():
     
-   
+    global taskName
+    Label(taskscreen, text="Task Name:", width=22).grid(row=1, column=0, columnspan=1)
+    taskName = Entry(taskscreen, bg="lightgrey", borderwidth=2,relief="flat")
+    taskName.grid(row=1,column=2,columnspan=1)
+
+    global taskInfo
+    Label(taskscreen, text="Task info:", width=22).grid(row=2, column=0, columnspan=1)
+    taskInfo = Text(taskscreen, width=40, height=10,bg="lightgrey", borderwidth=2, relief="flat")
+    taskInfo.grid(row=2,column=2,columnspan=1)
+
+    Button(taskscreen, text="Create task", command=isTaskComplete).grid(row=3, column=0,columnspan=4)
+
+
+def isTaskComplete():
+
+    global isTaskComplete
+    conn = sqlite3.connect("Accounts.db")
+    c = conn.cursor()
+
+    c.execute("SELECT * FROM userTasks")
+    allTasks = c.fetchall()
+
+
+    if len(taskName.get()) >= 1 and len(taskInfo.get("1.0",END)) >= 2   :
+        print(user_ID)
+
+        c.execute("INSERT INTO userTasks (taskName,task, userOfTasks) VALUES (:taskName, :task, :userOfTasks)",
+        {
+
+        'taskName' : taskName.get(),
+        'task' : taskInfo.get("1.0",END),
+        'userOfTask': user_ID
+
+        })
+        for usertasks in allTasks:
+            print(usertasks[0], usertasks[1],usertasks[2])
+    conn.commit()
+
+        
+
 
 def allAccounts():
 

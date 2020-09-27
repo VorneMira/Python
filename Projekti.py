@@ -5,6 +5,18 @@ import random
 
 global w1
 global w2
+global selectedCount
+selectedCount = 0
+global selectW
+selectW = False
+global editCount
+editCount = 0
+global editW
+editW = False
+global w2Count 
+w2Count = 0
+global w1Count
+w1Count = 0
 
 #Creates Accounts database and 2 tables in it if one does not exist yet
 if os.path.exists("Accounts.db") == False:
@@ -187,7 +199,6 @@ def logginIn():
 
 #Creates the TaskList screen 
 
-
 def openTaskList():
     global taskscreen
     taskscreen = Tk()
@@ -201,8 +212,7 @@ def openTaskList():
 
     Button(taskscreen, text="My tasks", bg="lightGrey", fg="green", width=40, command= showTasks).grid(row=0, column=4, columnspan=2)
 
-global w1Count
-w1Count = 0
+
 def createTask():
 
     global w1
@@ -211,24 +221,11 @@ def createTask():
     global w1Count
     w1Count += 1
 
-    if selectW:
-        showDiscription.destroy()
-    
-    if editW:
-        blankCommitLabel.destroy()
-        commitButton.destroy()
-        editDiscriptionLabel.destroy()
-        editDiscriptionText.destroy()
-        editNameLabel.destroy()
-        editNameEntry.destroy()
-
-    if w2:
-    
-        editButton.destroy()
-        selectButton.destroy()
-        deleteButton.destroy()
-        myTasksLabel.destroy()
-        UsersListBox.destroy()
+    deleteselectW()
+    deleteeditW()
+    deletew2()
+   
+  
     
     if w1Count == 1:
 
@@ -294,7 +291,6 @@ def createTask():
         createTask()
 
     
-
 def isTaskComplete():
 
     global isTaskComplete
@@ -324,9 +320,6 @@ def isTaskComplete():
         conn.close
         createTask()
 
-global w2Count 
-w2Count = 0
-
 
 def showTasks():
     
@@ -339,31 +332,9 @@ def showTasks():
     global w2Count
     w2Count += 1
 
-    if selectW:
-        showDiscription.destroy()
-    
-    if editW:
-        blankCommitLabel.destroy()
-        commitButton.destroy()
-        editDiscriptionLabel.destroy()
-        editDiscriptionText.destroy()
-        editNameEntry.destroy()
-        editNameLabel.destroy()
-        
-
-
-    if w1:
-        TaskAdviceLabel3.destroy()
-        EmptyLabel3.destroy()
-        EmptyLabel.destroy()
-        EmptyLabel2.destroy()
-        TaskAdviceLabel2.destroy()
-        TaskAdviceLabel.destroy()
-        TaskNameLabel.destroy()
-        TaskInfoLabel.destroy()
-        taskName.destroy()
-        taskInfo.destroy()
-        creatingTaskButton.destroy()
+    deleteselectW()
+    deleteeditW()
+    deletew1()
 
     if w2Count == 1:
         global myTasksLabel
@@ -380,11 +351,8 @@ def showTasks():
         for index in printUsersTaskNames:
             UsersListBox.insert(END, index)
 
-    
-        if UsersListBox.index("end") == 0:  
-            print("nothing in list check")
-
-
+        #if UsersListBox.index("end") == 0:  
+            #print("nothing in list check")
 
         global deleteButton
         deleteButton = Button(taskscreen, text="DELETE", bg="Red", fg="white", width=33, command=deleteTask)
@@ -397,19 +365,6 @@ def showTasks():
         global selectButton
         selectButton = Button(taskscreen, text="SELECT", bg="GREEN",fg="white", width=33, command=selectTask)
         selectButton.grid(row=6, column=0)
-      
-
-        
-
-
-    
-
-        
-            
-        #c.execute("SELECT * FROM userTasks")
-        #allTasks = c.fetchall()
-        #for usertasks in allTasks:
-            #print(usertasks[0], usertasks[1], usertasks[2])
     else:
        
         editButton.destroy()
@@ -432,25 +387,19 @@ def deleteTask():
     c.execute("DELETE FROM userTasks WHERE taskName = ?",(selectedTask))
     conn.commit()
 
-global editCount
-editCount = 0
-global editW
-editW = False
 
 def editTask():
 
     conn = sqlite3.connect("Accounts.db")
     c = conn.cursor()
 
-    
     global editW
     editW = True
 
     global editCount
     editCount += 1
 
-    if selectW:
-        showDiscription.destroy()
+    deleteselectW()
 
     if editCount == 1:
 
@@ -462,12 +411,8 @@ def editTask():
         editNameEntry = Entry(taskscreen)
         editNameEntry.grid(row=2, column=3)
 
-
-
         global selectedTask2
         selectedTask2 = UsersListBox.get(ANCHOR)
-
-
 
         global editDiscriptionLabel
         editDiscriptionLabel = Label(taskscreen, text="Edit task discription")
@@ -485,7 +430,6 @@ def editTask():
         commitButton = Button(taskscreen, text="Commit changes", bg="green", command= changeTask)
         commitButton.grid(row=4,column=3)
 
-        
         c.execute("SELECT taskName FROM userTasks WHERE taskName = ?",(selectedTask2))
         editName = c.fetchall()
 
@@ -497,9 +441,6 @@ def editTask():
 
         editDiscriptionText.insert(1.0,*tuple(*tuple(editDiscription)))
         
-        
-    
-
     else:
         blankCommitLabel.destroy()
         commitButton.destroy()
@@ -512,14 +453,10 @@ def editTask():
     
 def changeTask():
 
-
     conn = sqlite3.connect("Accounts.db")
     c = conn.cursor()
 
-
     areSpacesInName2 = (editNameEntry.get()).find(' ')
-    
-   
     
     if len(editNameEntry.get()) >= 1 and ((areSpacesInName2 != -1) == False):
         c.execute("DELETE FROM userTasks WHERE taskName = ?",(selectedTask2))
@@ -536,18 +473,10 @@ def changeTask():
         showTasks()
     
 
-
-
-global selectedCount
-selectedCount = 0
-global selectW
-selectW = False
-
 def selectTask():
 
     conn = sqlite3.connect("Accounts.db")
     c = conn.cursor()
-
 
     global selectW
     selectW = True
@@ -555,13 +484,7 @@ def selectTask():
     global selectedCount
     selectedCount += 1
 
-    if editW:
-        blankCommitLabel.destroy()
-        commitButton.destroy()
-        editDiscriptionLabel.destroy()
-        editDiscriptionText.destroy()
-        editNameLabel.destroy()
-        editNameEntry.destroy()
+    deleteeditW()
 
     if selectedCount == 1:
         global showDiscription
@@ -591,9 +514,6 @@ def selectTask():
         selectedCount = 0
         selectTask()
 
-
-    
-
 # len(taskInfo.get("1.0",END)) >= 2 and
 
 def allAccounts():
@@ -610,7 +530,38 @@ def allAccounts():
     if inputUsername == c.execute("SELECT name FROM Users") and inputPassword == c.execute("SELECT password FROM Users"):
         print("nais")
 
+def deleteselectW():
+    if selectW:
+        showDiscription.destroy()
+def deleteeditW():
+    if editW:
+        blankCommitLabel.destroy()
+        commitButton.destroy()
+        editDiscriptionLabel.destroy()
+        editDiscriptionText.destroy()
+        editNameLabel.destroy()
+        editNameEntry.destroy()
 
+def deletew2():
+    if w2:
+        editButton.destroy()
+        selectButton.destroy()
+        deleteButton.destroy()
+        myTasksLabel.destroy()
+        UsersListBox.destroy()
+def deletew1():
+    if w1:
+        TaskAdviceLabel3.destroy()
+        EmptyLabel3.destroy()
+        EmptyLabel.destroy()
+        EmptyLabel2.destroy()
+        TaskAdviceLabel2.destroy()
+        TaskAdviceLabel.destroy()
+        TaskNameLabel.destroy()
+        TaskInfoLabel.destroy()
+        taskName.destroy()
+        taskInfo.destroy()
+        creatingTaskButton.destroy()
 #logs closes the TaskList screen and opens main menu        
 def logOut():
 

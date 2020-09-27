@@ -3,7 +3,8 @@ import sqlite3
 import os
 import random
 
-
+global w1
+global w2
 
 #Creates Accounts database and 2 tables in it if one does not exist yet
 if os.path.exists("Accounts.db") == False:
@@ -20,7 +21,7 @@ if os.path.exists("Accounts.db") == False:
 
     #this table holds all the users tasks
     TaskTable= '''CREATE TABLE userTasks (
-        userOfTasks integer FOREIGN KEY,
+        userOfTasks integer NOT NULL,
         taskName varchar(20),
         task varchar(1000),
         FOREIGN KEY(userOfTasks) REFERENCES Users(ID)
@@ -83,7 +84,7 @@ def createAcc():
     
     #if the the inputted is atleast 4 characters long and password atleast 1 character long it registers the account to the Users table
     else:
-        if len(Username.get()) > 3 and len(Password.get()) >= 1:
+        if len(Username.get()) > 3 and len(Password.get()) >= 4:
             c.execute("INSERT INTO Users (name,password) VALUES (:name, :password)",
             {
             'name' : Username.get(),
@@ -92,10 +93,10 @@ def createAcc():
             existsLabel['text'] = ""
             screen1.destroy()
            
-        elif len(Password.get()) <1:
-            existsLabel['text'] = "Password must be atleast 1 character long"
-        elif len(Username.get()) <= 2:
-            existsLabel['text'] = "Username must be atleast 3 characters long"
+        elif len(Password.get()) <4:
+            existsLabel['text'] = "Password must be atleast 4 character long"
+        elif len(Username.get()) <4:
+            existsLabel['text'] = "Username must be atleast 4 characters long"
 
     conn.commit()
     conn.close
@@ -127,7 +128,7 @@ def Login():
     inputPassword.pack()
 
     Button(screen2, text = "Log in", width = 10, height = 1, command = logginIn, fg="green").pack()
-    Button(screen2, text = "Accounts", width = 10, height = 1, command = allAccounts).pack()
+    #Button(screen2, text = "Accounts", width = 10, height = 1, command = allAccounts).pack()
 
 #This function checks what account you logged in with
 def logginIn():
@@ -152,17 +153,14 @@ def logginIn():
         user_ID = c.fetchone()
         user_ID = int(user_ID[0])
 
-
-        #user_ID = user_ID.replace("[","")
-        #user_ID = user_ID.replace("(","")
-        #user_ID = user_ID.replace(",","")
-        #user_ID = user_ID.replace(")","")
-        #user_ID = user_ID.replace("]","")
-
-        print(user_ID)
+        global w1
+        w1 = False
+        global w2
+        w2 = False
 
         openTaskList()
         screen.destroy()
+       
     
     else:
         #kicks you out of log in window if you get the acc name or password wrong 20 times
@@ -188,34 +186,114 @@ def logginIn():
                 errorLabel['text'] = "nope"
 
 #Creates the TaskList screen 
+
+
 def openTaskList():
     global taskscreen
     taskscreen = Tk()
-    taskscreen.geometry("777x800")
+    taskscreen.geometry("988x600")
     taskscreen.title("TaskList")
 
     
-    Button(taskscreen, text="Log out", bg="lightGray", fg="blue",command= logOut, width=23).grid(row=0 ,column=0, columnspan=2)
+    Button(taskscreen, text="Log out", bg="lightGray", fg="blue",command= logOut, width=35).grid(row=0 ,column=0, columnspan=2)
     
-    Button(taskscreen, text="Create new task", bg="lightGray", fg="green", width=31, command= createTask).grid(row=0 ,column=2, columnspan=2)
+    Button(taskscreen, text="Create new task", bg="lightGray", fg="green", width=62, command= createTask).grid(row=0 ,column=2, columnspan=2)
 
-    Button(taskscreen, text="My tasks", bg="lightGrey", fg="green", width=31).grid(row=0, column=4, columnspan=2)
+    Button(taskscreen, text="My tasks", bg="lightGrey", fg="green", width=40, command= showTasks).grid(row=0, column=4, columnspan=2)
 
-    
+global w1Count
+w1Count = 0
 def createTask():
+
+    global w1
+    w1 = True
+
+    global w1Count
+    w1Count += 1
+
+    if selectW:
+        showDiscription.destroy()
     
-    global taskName
-    Label(taskscreen, text="Task Name:", width=22).grid(row=1, column=0, columnspan=1)
-    taskName = Entry(taskscreen, bg="lightgrey", borderwidth=2,relief="flat")
-    taskName.grid(row=1,column=2,columnspan=1)
+    if editW:
+        blankCommitLabel.destroy()
+        commitButton.destroy()
+        editDiscriptionLabel.destroy()
+        editDiscriptionText.destroy()
+        editNameLabel.destroy()
+        editNameEntry.destroy()
 
-    global taskInfo
-    Label(taskscreen, text="Task info:", width=22).grid(row=2, column=0, columnspan=1)
-    taskInfo = Text(taskscreen, width=40, height=10,bg="lightgrey", borderwidth=2, relief="flat")
-    taskInfo.grid(row=2,column=2,columnspan=1)
+    if w2:
+    
+        editButton.destroy()
+        selectButton.destroy()
+        deleteButton.destroy()
+        myTasksLabel.destroy()
+        UsersListBox.destroy()
+    
+    if w1Count == 1:
 
-    Button(taskscreen, text="Create task", command=isTaskComplete).grid(row=3, column=0,columnspan=4)
+        global EmptyLabel
+        EmptyLabel = Label(taskscreen, text="", width=22)
+        EmptyLabel.grid(row=1, column=0, columnspan=1)
 
+        global TaskNameLabel
+        TaskNameLabel = Label(taskscreen, text="Task Name:", width=22)
+        TaskNameLabel.grid(row=2, column=0, columnspan=1)
+
+        global taskName
+        taskName = Entry(taskscreen, bg="lightgrey", borderwidth=2,relief="flat")
+        taskName.grid(row=2,column=2,columnspan=1)
+
+        global EmptyLabel2
+        EmptyLabel2 = Label(taskscreen, text="", width=22)
+        EmptyLabel2.grid(row=3, column=0, columnspan=1)
+
+        global TaskInfoLabel
+        TaskInfoLabel = Label(taskscreen, text="Task description:", width=22)
+        TaskInfoLabel.grid(row=4, column=0, columnspan=1)
+
+        global taskInfo
+        taskInfo = Text(taskscreen, width=40, height=10,bg="lightgrey", borderwidth=2, relief="flat")
+        taskInfo.grid(row=4,column=2,columnspan=1)
+
+        global creatingTaskButton
+        creatingTaskButton = Button(taskscreen, text="Create task", bg="green", fg="white", command=isTaskComplete)
+        creatingTaskButton.grid(row=4, column=3,columnspan=4)
+
+        global EmptyLabel3
+        EmptyLabel3 = Label(taskscreen, text="", width=22)
+        EmptyLabel3.grid(row=6, column=0, columnspan=1)
+
+        global TaskAdviceLabel
+        TaskAdviceLabel = Label(taskscreen, text="The task doesen't get saved if it doesen't have atleast 1 character and it can not have any spaces", width=80)
+        TaskAdviceLabel.grid(row=7, column=1, columnspan=4)
+
+        global TaskAdviceLabel3
+        TaskAdviceLabel3 = Label(taskscreen, text="You can't make 2 same named tasks", width=40)
+        TaskAdviceLabel3.grid(row=8, column=1, columnspan=4)
+
+        global TaskAdviceLabel2
+        TaskAdviceLabel2 = Label(taskscreen, text="The task description is optional", width=40)
+        TaskAdviceLabel2.grid(row=9, column=1, columnspan=4)
+
+       
+
+    else:
+        EmptyLabel3.destroy()
+        EmptyLabel2.destroy()
+        EmptyLabel.destroy()
+        TaskAdviceLabel3.destroy()
+        TaskAdviceLabel2.destroy()
+        TaskAdviceLabel.destroy()
+        TaskNameLabel.destroy()
+        TaskInfoLabel.destroy()
+        taskName.destroy()
+        taskInfo.destroy()
+        creatingTaskButton.destroy()
+        w1Count = 0
+        createTask()
+
+    
 
 def isTaskComplete():
 
@@ -223,27 +301,300 @@ def isTaskComplete():
     conn = sqlite3.connect("Accounts.db")
     c = conn.cursor()
 
-    c.execute("SELECT * FROM userTasks")
-    allTasks = c.fetchall()
+    doesTaskAlreadyExist = c.execute("SELECT taskName FROM userTasks WHERE taskName= ?",(taskName.get(),))
+    doesTaskAlreadyExist = c.fetchall()
+    if len(doesTaskAlreadyExist) == 0:
+        doesTaskAlreadyExist = False
+    else:
+        doesTaskAlreadyExist = True
 
+    areSpacesInName = (taskName.get()).find(' ')
 
-    if len(taskName.get()) >= 1 and len(taskInfo.get("1.0",END)) >= 2   :
-        print(user_ID)
+    if len(taskName.get()) >= 1 and ((areSpacesInName != -1) == False) and (doesTaskAlreadyExist == False):
 
-        c.execute("INSERT INTO userTasks (taskName,task, userOfTasks) VALUES (:taskName, :task, :userOfTasks)",
+        c.execute("INSERT INTO userTasks(taskName,task, userOfTasks) VALUES (:taskName, :task, :userOfTasks)",
         {
 
         'taskName' : taskName.get(),
         'task' : taskInfo.get("1.0",END),
-        'userOfTask': user_ID
+        'userOfTasks' : user_ID
 
         })
-        for usertasks in allTasks:
-            print(usertasks[0], usertasks[1],usertasks[2])
-    conn.commit()
+        conn.commit()
+        conn.close
+        createTask()
+
+global w2Count 
+w2Count = 0
+
+
+def showTasks():
+    
+    conn = sqlite3.connect("Accounts.db")
+    c = conn.cursor()
+
+    global w2
+    w2 = True
+
+    global w2Count
+    w2Count += 1
+
+    if selectW:
+        showDiscription.destroy()
+    
+    if editW:
+        blankCommitLabel.destroy()
+        commitButton.destroy()
+        editDiscriptionLabel.destroy()
+        editDiscriptionText.destroy()
+        editNameEntry.destroy()
+        editNameLabel.destroy()
+        
+
+
+    if w1:
+        TaskAdviceLabel3.destroy()
+        EmptyLabel3.destroy()
+        EmptyLabel.destroy()
+        EmptyLabel2.destroy()
+        TaskAdviceLabel2.destroy()
+        TaskAdviceLabel.destroy()
+        TaskNameLabel.destroy()
+        TaskInfoLabel.destroy()
+        taskName.destroy()
+        taskInfo.destroy()
+        creatingTaskButton.destroy()
+
+    if w2Count == 1:
+        global myTasksLabel
+        myTasksLabel = Label(taskscreen, text="Your tasks")
+        myTasksLabel.grid(row=2)
+
+        global UsersListBox
+        UsersListBox = Listbox(taskscreen, width=40, height=20)
+        UsersListBox.grid(row=3)
+
+        c.execute("SELECT taskName FROM userTasks WHERE userOfTasks= ?",(user_ID,))
+        printUsersTaskNames = c.fetchall()
+    
+        for index in printUsersTaskNames:
+            UsersListBox.insert(END, index)
+
+    
+        if UsersListBox.index("end") == 0:  
+            print("nothing in list check")
+
+
+
+        global deleteButton
+        deleteButton = Button(taskscreen, text="DELETE", bg="Red", fg="white", width=33, command=deleteTask)
+        deleteButton.grid(row=4, column=0)
+
+        global editButton
+        editButton = Button(taskscreen, text="EDIT", bg="YELLOW", width=33, command=editTask)
+        editButton.grid(row=5, column=0)
+
+        global selectButton
+        selectButton = Button(taskscreen, text="SELECT", bg="GREEN",fg="white", width=33, command=selectTask)
+        selectButton.grid(row=6, column=0)
+      
 
         
 
+
+    
+
+        
+            
+        #c.execute("SELECT * FROM userTasks")
+        #allTasks = c.fetchall()
+        #for usertasks in allTasks:
+            #print(usertasks[0], usertasks[1], usertasks[2])
+    else:
+       
+        editButton.destroy()
+        selectButton.destroy()
+        deleteButton.destroy()
+
+        myTasksLabel.destroy()
+        UsersListBox.destroy()
+        w2Count = 0
+        showTasks()
+    
+def deleteTask():
+    
+    conn = sqlite3.connect("Accounts.db")
+    c = conn.cursor()
+
+    selectedTask = UsersListBox.get(ANCHOR)
+
+    UsersListBox.delete(ANCHOR)
+    c.execute("DELETE FROM userTasks WHERE taskName = ?",(selectedTask))
+    conn.commit()
+
+global editCount
+editCount = 0
+global editW
+editW = False
+
+def editTask():
+
+    conn = sqlite3.connect("Accounts.db")
+    c = conn.cursor()
+
+    
+    global editW
+    editW = True
+
+    global editCount
+    editCount += 1
+
+    if selectW:
+        showDiscription.destroy()
+
+    if editCount == 1:
+
+        global editNameLabel
+        editNameLabel = Label(taskscreen, text="EDIT NAME")
+        editNameLabel.grid(row=2, column=2)
+
+        global editNameEntry
+        editNameEntry = Entry(taskscreen)
+        editNameEntry.grid(row=2, column=3)
+
+
+
+        global selectedTask2
+        selectedTask2 = UsersListBox.get(ANCHOR)
+
+
+
+        global editDiscriptionLabel
+        editDiscriptionLabel = Label(taskscreen, text="Edit task discription")
+        editDiscriptionLabel.grid(row=3, column=2)
+
+        global editDiscriptionText
+        editDiscriptionText = Text(taskscreen, width=40, height=20)
+        editDiscriptionText.grid(row=3, column=3)
+
+        global blankCommitLabel
+        blankCommitLabel = Label(taskscreen, text="")
+        blankCommitLabel.grid(row=4,column=2)
+
+        global commitButton
+        commitButton = Button(taskscreen, text="Commit changes", bg="green", command= changeTask)
+        commitButton.grid(row=4,column=3)
+
+        
+        c.execute("SELECT taskName FROM userTasks WHERE taskName = ?",(selectedTask2))
+        editName = c.fetchall()
+
+        editNameEntry.insert(0, editName)
+
+
+        c.execute("SELECT Task FROM userTasks WHERE taskName = ?",(selectedTask2))
+        editDiscription = c.fetchall()
+
+        editDiscriptionText.insert(1.0,*tuple(*tuple(editDiscription)))
+        
+        
+    
+
+    else:
+        blankCommitLabel.destroy()
+        commitButton.destroy()
+        editDiscriptionLabel.destroy()
+        editDiscriptionText.destroy()
+        editNameEntry.destroy()
+        editNameLabel.destroy()
+        editCount = 0
+        editTask()
+    
+def changeTask():
+
+
+    conn = sqlite3.connect("Accounts.db")
+    c = conn.cursor()
+
+
+    areSpacesInName2 = (editNameEntry.get()).find(' ')
+    
+   
+    
+    if len(editNameEntry.get()) >= 1 and ((areSpacesInName2 != -1) == False):
+        c.execute("DELETE FROM userTasks WHERE taskName = ?",(selectedTask2))
+
+        c.execute("INSERT INTO userTasks(taskName,task, userOfTasks) VALUES (:taskName, :task, :userOfTasks)",
+        {
+
+        'taskName' : editNameEntry.get(),
+        'task' : editDiscriptionText.get("1.0",END),
+        'userOfTasks' : user_ID
+
+        })
+        conn.commit()
+        showTasks()
+    
+
+
+
+global selectedCount
+selectedCount = 0
+global selectW
+selectW = False
+
+def selectTask():
+
+    conn = sqlite3.connect("Accounts.db")
+    c = conn.cursor()
+
+
+    global selectW
+    selectW = True
+
+    global selectedCount
+    selectedCount += 1
+
+    if editW:
+        blankCommitLabel.destroy()
+        commitButton.destroy()
+        editDiscriptionLabel.destroy()
+        editDiscriptionText.destroy()
+        editNameLabel.destroy()
+        editNameEntry.destroy()
+
+    if selectedCount == 1:
+        global showDiscription
+        showDiscription = Text(taskscreen, width=40, height=20, font=("Helvetica", 10))
+        showDiscription.grid(row=3, column=2)
+
+       
+        selectedTask1 = UsersListBox.get(ANCHOR)
+
+        c.execute("SELECT taskName FROM userTasks WHERE taskName = ?",(selectedTask1))
+        header = c.fetchall()
+
+        c.execute("SELECT Task FROM userTasks WHERE taskName = ?",(selectedTask1))
+        discription = c.fetchall()
+
+
+        showDiscription.insert(1.0,header)
+        showDiscription.insert(2.0,"\n")
+        showDiscription.insert(3.0,"\n")
+        showDiscription.insert(4.0,"Description:\n")
+        showDiscription.insert(5.0,"\n")
+        showDiscription.insert(6.0,*tuple(*tuple(discription)))
+        showDiscription.config(state="disabled")
+
+    else:
+        showDiscription.destroy()
+        selectedCount = 0
+        selectTask()
+
+
+    
+
+# len(taskInfo.get("1.0",END)) >= 2 and
 
 def allAccounts():
 
@@ -258,8 +609,29 @@ def allAccounts():
         print("----------------------------")
     if inputUsername == c.execute("SELECT name FROM Users") and inputPassword == c.execute("SELECT password FROM Users"):
         print("nais")
+
+
 #logs closes the TaskList screen and opens main menu        
 def logOut():
+
+    global editCount
+    editCount = 0
+    global selectedCount
+    selectedCount = 0
+    global w1Count
+    w1Count = 0
+    global w2Count
+    w2Count = 0
+
+    global selectW
+    selectW = False
+    global editW
+    editW = False
+    global w1
+    w1 = False
+    global w2
+    w2 = False
+
     taskscreen.destroy()
     main_screen()
 #Main menu
@@ -273,7 +645,6 @@ def main_screen():
     Button(text = "Log in", height = "2", width = "30", command = Login).pack()
     Label(text ="").pack()
     Button(text = "Create a new account", height = "2", width = "30", command = Register).pack()
-    Button(text ="hax", command= openTaskList).pack()
     screen.mainloop()
 
 

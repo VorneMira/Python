@@ -202,15 +202,15 @@ def logginIn():
 def openTaskList():
     global taskscreen
     taskscreen = Tk()
-    taskscreen.geometry("988x600")
+    taskscreen.geometry("1182x600")
     taskscreen.title("TaskList")
 
     
-    Button(taskscreen, text="Log out", bg="lightGray", fg="blue",command= logOut, width=35).grid(row=0 ,column=0, columnspan=2)
+    Button(taskscreen, text="Log out", bg="lightGray", fg="blue",command= logOut, width=45).grid(row=0 ,column=0, columnspan=2)
     
-    Button(taskscreen, text="Create new task", bg="lightGray", fg="green", width=62, command= createTask).grid(row=0 ,column=2, columnspan=2)
+    Button(taskscreen, text="Create new task", bg="lightGray", fg="green", width=55, command= createTask).grid(row=0 ,column=2, columnspan=2)
 
-    Button(taskscreen, text="My tasks", bg="lightGrey", fg="green", width=40, command= showTasks).grid(row=0, column=4, columnspan=2)
+    Button(taskscreen, text="My tasks", bg="lightGrey", fg="green", width=30, command= showTasks).grid(row=0, column=4, columnspan=2)
 
 
 def createTask():
@@ -254,7 +254,7 @@ def createTask():
         taskInfo.grid(row=4,column=2,columnspan=1)
 
         global creatingTaskButton
-        creatingTaskButton = Button(taskscreen, text="Create task", bg="green", fg="white", command=isTaskComplete)
+        creatingTaskButton = Button(taskscreen, text="Create task", fg="green", command=isTaskComplete)
         creatingTaskButton.grid(row=4, column=3,columnspan=4)
 
         global EmptyLabel3
@@ -355,15 +355,15 @@ def showTasks():
             #print("nothing in list check")
 
         global deleteButton
-        deleteButton = Button(taskscreen, text="DELETE", bg="Red", fg="white", width=33, command=deleteTask)
+        deleteButton = Button(taskscreen, text="DELETE SELECTED TASK",  fg="red", width=33, command=deleteTask)
         deleteButton.grid(row=4, column=0)
 
         global editButton
-        editButton = Button(taskscreen, text="EDIT", bg="YELLOW", width=33, command=editTask)
+        editButton = Button(taskscreen, text="EDIT SELECTED TASK", fg="orange", width=33, command=editTask)
         editButton.grid(row=5, column=0)
 
         global selectButton
-        selectButton = Button(taskscreen, text="SELECT", bg="GREEN",fg="white", width=33, command=selectTask)
+        selectButton = Button(taskscreen, text="SHOW SELECTED TASK",fg="green", width=33, command=selectTask)
         selectButton.grid(row=6, column=0)
     else:
        
@@ -419,7 +419,7 @@ def editTask():
         editDiscriptionLabel.grid(row=3, column=2)
 
         global editDiscriptionText
-        editDiscriptionText = Text(taskscreen, width=40, height=20)
+        editDiscriptionText = Text(taskscreen, width=40, height=20, bg="lightgrey")
         editDiscriptionText.grid(row=3, column=3)
 
         global blankCommitLabel
@@ -488,7 +488,7 @@ def selectTask():
 
     if selectedCount == 1:
         global showDiscription
-        showDiscription = Text(taskscreen, width=40, height=20, font=("Helvetica", 10))
+        showDiscription = Text(taskscreen, width=40, height=20, bg="lightgrey", font=("Helvetica", 18))
         showDiscription.grid(row=3, column=2)
 
        

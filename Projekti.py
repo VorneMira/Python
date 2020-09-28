@@ -76,7 +76,6 @@ def Register():
     Button(screen1, text = "Register", width = 10, height = 1, command = createAcc, fg="green").pack()
     existsLabel.pack()
 
-    
 # Function checks if your account can be registered, it makes sure you dont make an account that has a password with less than 1 character or a name with less than 4 characters
 # It also doesent let you create an account if an account with the same name and password already exists
 def createAcc():
@@ -89,7 +88,6 @@ def createAcc():
     c.execute(findUser,[(Username.get()),(Password.get())])
     isUserTaken = c.fetchall()
 
-    
     #if isUserTaken is TRUE it gives you a error message does not make a new account
     if isUserTaken:
         existsLabel['text'] = "User already exists"
@@ -140,7 +138,6 @@ def Login():
     inputPassword.pack()
 
     Button(screen2, text = "Log in", width = 10, height = 1, command = logginIn, fg="green").pack()
-    #Button(screen2, text = "Accounts", width = 10, height = 1, command = allAccounts).pack()
 
 #This function checks what account you logged in with
 def logginIn():
@@ -150,17 +147,19 @@ def logginIn():
     conn = sqlite3.connect("Accounts.db")
     c = conn.cursor()
 
-    
     findUser = ("SELECT * FROM Users WHERE name = ? AND password = ?")
     c.execute(findUser,[(inputUsername.get()),(inputPassword.get())])
     accountInput= c.fetchall()
 
-    #opens taskList if you logged in with an registered account
+    #opens taskList if you logged in with an registered account and saves the accounts id in a variable
     if accountInput:
+
+        #finds the logged accounts id
         global findID
         findID = ("SELECT ID FROM Users WHERE name = ? AND password = ?")
         c.execute(findID,[inputUsername.get(),inputPassword.get()])
 
+        #saves the found id to a variable
         global user_ID
         user_ID = c.fetchone()
         user_ID = int(user_ID[0])
@@ -172,8 +171,7 @@ def logginIn():
 
         openTaskList()
         screen.destroy()
-       
-    
+        
     else:
         #kicks you out of log in window if you get the acc name or password wrong 20 times
         randomErrorMessage = random.randint(0,5)
@@ -198,14 +196,12 @@ def logginIn():
                 errorLabel['text'] = "nope"
 
 #Creates the TaskList screen 
-
 def openTaskList():
     global taskscreen
     taskscreen = Tk()
     taskscreen.geometry("1182x600")
     taskscreen.title("TaskList")
 
-    
     Button(taskscreen, text="Log out", bg="lightGray", fg="blue",command= logOut, width=45).grid(row=0 ,column=0, columnspan=2)
     
     Button(taskscreen, text="Create new task", bg="lightGray", fg="green", width=55, command= createTask).grid(row=0 ,column=2, columnspan=2)
@@ -226,7 +222,7 @@ def createTask():
     deletew2()
    
   
-    
+    #checks if you have already pressed the Create new task button if you have it deletes the existing labels and entrys... and makes new ones othervice it just creates new ones
     if w1Count == 1:
 
         global EmptyLabel
@@ -273,8 +269,6 @@ def createTask():
         TaskAdviceLabel2 = Label(taskscreen, text="The task description is optional", width=40)
         TaskAdviceLabel2.grid(row=9, column=1, columnspan=4)
 
-       
-
     else:
         EmptyLabel3.destroy()
         EmptyLabel2.destroy()
@@ -290,22 +284,26 @@ def createTask():
         w1Count = 0
         createTask()
 
-    
+#checks if your created task is viable
+
 def isTaskComplete():
 
     global isTaskComplete
     conn = sqlite3.connect("Accounts.db")
     c = conn.cursor()
 
+    global doesTaskAlreadyExist
+    #saves a boolean value to doesTaskAlreadyExist, if its true it means that there is already a task with the same name
     doesTaskAlreadyExist = c.execute("SELECT taskName FROM userTasks WHERE taskName= ?",(taskName.get(),))
     doesTaskAlreadyExist = c.fetchall()
     if len(doesTaskAlreadyExist) == 0:
         doesTaskAlreadyExist = False
     else:
         doesTaskAlreadyExist = True
-
+    #gives a -1 value to areSpacesInName if it finds spaces in the task name Entry 
     areSpacesInName = (taskName.get()).find(' ')
 
+    #doesent create a new task if given task name is less than 1 character or if it has spaces or if a task with the same name already exists
     if len(taskName.get()) >= 1 and ((areSpacesInName != -1) == False) and (doesTaskAlreadyExist == False):
 
         c.execute("INSERT INTO userTasks(taskName,task, userOfTasks) VALUES (:taskName, :task, :userOfTasks)",
@@ -320,7 +318,7 @@ def isTaskComplete():
         conn.close
         createTask()
 
-
+#shows all your tasks in a list and creates buttons "delete selected task", "edit seleced task" and "show selected task"
 def showTasks():
     
     conn = sqlite3.connect("Accounts.db")
@@ -336,6 +334,7 @@ def showTasks():
     deleteeditW()
     deletew1()
 
+    #checks if you have already pressed the Show tasks button if you have it deletes the existing labels and entrys... and makes new ones othervice it just creates new ones
     if w2Count == 1:
         global myTasksLabel
         myTasksLabel = Label(taskscreen, text="Your tasks")
@@ -347,12 +346,10 @@ def showTasks():
 
         c.execute("SELECT taskName FROM userTasks WHERE userOfTasks= ?",(user_ID,))
         printUsersTaskNames = c.fetchall()
-    
+
+        #when opening "my tasks" it inserts every task that haves the same id as the logged in account in the Listbox
         for index in printUsersTaskNames:
             UsersListBox.insert(END, index)
-
-        #if UsersListBox.index("end") == 0:  
-            #print("nothing in list check")
 
         global deleteButton
         deleteButton = Button(taskscreen, text="DELETE SELECTED TASK",  fg="red", width=33, command=deleteTask)
@@ -375,7 +372,7 @@ def showTasks():
         UsersListBox.destroy()
         w2Count = 0
         showTasks()
-    
+#deletes selected task
 def deleteTask():
     
     conn = sqlite3.connect("Accounts.db")
@@ -387,7 +384,7 @@ def deleteTask():
     c.execute("DELETE FROM userTasks WHERE taskName = ?",(selectedTask))
     conn.commit()
 
-
+#opens task editor 
 def editTask():
 
     conn = sqlite3.connect("Accounts.db")
@@ -400,7 +397,7 @@ def editTask():
     editCount += 1
 
     deleteselectW()
-
+    #checks if you have already pressed the Edit selected task button if you have it deletes the existing labels and entrys... and makes new ones othervice it just creates new ones
     if editCount == 1:
 
         global editNameLabel
@@ -457,8 +454,17 @@ def changeTask():
     c = conn.cursor()
 
     areSpacesInName2 = (editNameEntry.get()).find(' ')
-    
-    if len(editNameEntry.get()) >= 1 and ((areSpacesInName2 != -1) == False):
+
+    global doesTaskAlreadyExist
+    #saves a boolean value to doesTaskAlreadyExist, if its true it means that there is already a task with the same name
+    doesTaskAlreadyExist = c.execute("SELECT taskName FROM userTasks WHERE taskName= ?",(editNameEntry.get(),))
+    doesTaskAlreadyExist = c.fetchall()
+    if len(doesTaskAlreadyExist) == 0:
+        doesTaskAlreadyExist = False
+    else:
+        doesTaskAlreadyExist = True
+    #if you try to commit an edited task with a name that has spaces or less than 1 character it doesent let you commit it 
+    if len(editNameEntry.get()) >= 1 and ((areSpacesInName2 != -1) == False) and (doesTaskAlreadyExist ==False):
         c.execute("DELETE FROM userTasks WHERE taskName = ?",(selectedTask2))
 
         c.execute("INSERT INTO userTasks(taskName,task, userOfTasks) VALUES (:taskName, :task, :userOfTasks)",
@@ -472,7 +478,7 @@ def changeTask():
         conn.commit()
         showTasks()
     
-
+#shows you what your selected task has inside
 def selectTask():
 
     conn = sqlite3.connect("Accounts.db")
@@ -486,6 +492,7 @@ def selectTask():
 
     deleteeditW()
 
+    #checks if you have already pressed the Show selected task button if you have it deletes the existing labels and entrys... and makes new ones othervice it just creates new ones
     if selectedCount == 1:
         global showDiscription
         showDiscription = Text(taskscreen, width=40, height=20, bg="lightgrey", font=("Helvetica", 18))
@@ -513,26 +520,11 @@ def selectTask():
         showDiscription.destroy()
         selectedCount = 0
         selectTask()
-
-# len(taskInfo.get("1.0",END)) >= 2 and
-
-def allAccounts():
-
-    conn = sqlite3.connect("Accounts.db")
-
-    c = conn.cursor()
-    c.execute("SELECT * FROM Users")
-    Accounts = c.fetchall()
-
-    for account in Accounts:
-        print(account[0], account[1], account[2])
-        print("----------------------------")
-    if inputUsername == c.execute("SELECT name FROM Users") and inputPassword == c.execute("SELECT password FROM Users"):
-        print("nais")
-
+#checks if you have pressed show selected task button before, and if you have it deletes the labels created from it
 def deleteselectW():
     if selectW:
         showDiscription.destroy()
+#checks if you have pressed edit selected task button before, and if you have it deletes the labels created from it
 def deleteeditW():
     if editW:
         blankCommitLabel.destroy()
@@ -541,7 +533,7 @@ def deleteeditW():
         editDiscriptionText.destroy()
         editNameLabel.destroy()
         editNameEntry.destroy()
-
+#checks if you have pressed show tasks button before, and if you have it deletes the labels created from it
 def deletew2():
     if w2:
         editButton.destroy()
@@ -549,6 +541,7 @@ def deletew2():
         deleteButton.destroy()
         myTasksLabel.destroy()
         UsersListBox.destroy()
+#checks if you have pressed create new task button before, and if you have it deletes the labels created from it
 def deletew1():
     if w1:
         TaskAdviceLabel3.destroy()
@@ -597,7 +590,6 @@ def main_screen():
     Label(text ="").pack()
     Button(text = "Create a new account", height = "2", width = "30", command = Register).pack()
     screen.mainloop()
-
 
 main_screen()
 
